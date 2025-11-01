@@ -121,7 +121,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 from sklearn.base import RegressorMixin
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 # Setup logging configuration
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -153,7 +153,7 @@ class RegressionModelEvaluationStrategy(ModelEvaluationStrategy):
         self, model: RegressorMixin, X_test: pd.DataFrame, y_test: pd.Series
     ) -> dict:
         """
-        Evaluates a regression model using R-squared and Mean Squared Error.
+        Evaluates a regression model using comprehensive metrics.
 
         Parameters:
         model (RegressorMixin): The trained regression model to evaluate.
@@ -161,18 +161,41 @@ class RegressionModelEvaluationStrategy(ModelEvaluationStrategy):
         y_test (pd.Series): The testing data labels/target.
 
         Returns:
-        dict: A dictionary containing R-squared and Mean Squared Error.
+        dict: A dictionary containing comprehensive evaluation metrics.
         """
         logging.info("Predicting using the trained model.")
         y_pred = model.predict(X_test)
 
-        logging.info("Calculating evaluation metrics.")
+        logging.info("Calculating comprehensive evaluation metrics.")
         mse = mean_squared_error(y_test, y_pred)
+        rmse = np.sqrt(mse)
+        mae = mean_absolute_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
+        
+        # Calculate MAPE (Mean Absolute Percentage Error)
+        mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+        
+        # Calculate additional metrics
+        mean_actual = np.mean(y_test)
+        mean_predicted = np.mean(y_pred)
+        
+        metrics = {
+            "Mean Squared Error": mse,
+            "Root Mean Squared Error": rmse,
+            "Mean Absolute Error": mae,
+            "R-Squared": r2,
+            "MAPE": mape,
+            "Mean Actual Price": mean_actual,
+            "Mean Predicted Price": mean_predicted
+        }
 
-        metrics = {"Mean Squared Error": mse, "R-Squared": r2}
-
-        logging.info(f"Model Evaluation Metrics: {metrics}")
+        logging.info(f"🎯 Model Performance Summary:")
+        logging.info(f"   R² Score: {r2:.4f}")
+        logging.info(f"   RMSE: ${rmse:,.2f}")
+        logging.info(f"   MAE: ${mae:,.2f}")
+        logging.info(f"   MAPE: {mape:.2f}%")
+        logging.info(f"   Mean Actual Price: ${mean_actual:,.2f}")
+        
         return metrics
 
 
