@@ -1,0 +1,77 @@
+# Docker ignore file for price prediction system
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Results and artifacts
+results/
+mlruns/
+models/*.pkl
+models/*.joblib
+
+# Data (exclude from image, mount as volume)
+data/raw/*
+data/processed/*
+!data/.gitkeep
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# CI/CD
+.github/
+.gitignore
+
+# Development tools
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+build/
+dist/
+
+# Node modules (if any)
+node_modules/
+
+# Jupyter notebooks (mount as volume instead)
+*.ipynb
+
+# Configuration (use environment variables instead)
+config/local.yaml
+.env.local

@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Main ML Pipeline Service
+  ml-pipeline:
+    build: .
+    container_name: price-predictor-pipeline
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_TYPE=linear_regression
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./results:/app/results
+      - ./mlruns:/app/mlruns
+    ports:
+      - "5000:5000"
+    networks:
+      - ml-network
+    depends_on:
+      - mlflow-db
+    command: python run_pipeline.py
+
+  # MLflow Tracking Server
+  mlflow-server:
+    build: .
+    container_name: price-predictor-mlflow
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://mlflow:mlflow@mlflow-db:5432/mlflow
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/app/mlruns
+    volumes:
+      - ./mlruns:/app/mlruns
+    ports:
+      - "5001:5000"
+    networks:
+      - ml-network
+    depends_on:
+      - mlflow-db
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://mlflow:mlflow@mlflow-db:5432/mlflow
+
+  # PostgreSQL Database for MLflow
+  mlflow-db:
+    image: postgres:13
+    container_name: price-predictor-db
+    environment:
+      - POSTGRES_DB=mlflow
+      - POSTGRES_USER=mlflow
+      - POSTGRES_PASSWORD=mlflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ml-network
+
+  # Jupyter Notebook Service
+  jupyter:
+    build: .
+    container_name: price-predictor-jupyter
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    volumes:
+      - ./:/app
+    ports:
+      - "8888:8888"
+    networks:
+      - ml-network
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''
+
+  # Model Serving API
+  model-api:
+    build: .
+    container_name: price-predictor-api
+    environment:
+      - PYTHONPATH=/app
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    networks:
+      - ml-network
+    command: python run_deployment.py
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:6-alpine
+    container_name: price-predictor-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ml-network
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+
+networks:
+  ml-network:
+    driver: bridge
