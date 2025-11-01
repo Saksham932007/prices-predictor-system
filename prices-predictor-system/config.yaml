@@ -1,3 +1,4 @@
+# Enhanced ML Pipeline Configuration
 enable_cache: False
 
 settings:
@@ -9,5 +10,67 @@ settings:
 model:
   name: prices_predictor
   license: Apache 2.0
-  description: Predictor of housing prices.
-  tags: ["regression", "housing", "price_prediction"]
+  description: Enhanced predictor of housing prices with comprehensive ML pipeline.
+  tags: ["regression", "housing", "price_prediction", "enhanced"]
+
+# Model Training Configuration
+model_config:
+  model_type: "linear_regression"
+  random_state: 42
+  test_size: 0.2
+  cv_folds: 5
+  
+  # Linear Regression parameters
+  fit_intercept: true
+  normalize: false
+  
+  # Random Forest parameters
+  rf_n_estimators: 100
+  rf_max_depth: null
+  rf_min_samples_split: 2
+  
+  # XGBoost parameters
+  xgb_learning_rate: 0.1
+  xgb_max_depth: 6
+  xgb_n_estimators: 100
+
+# Data Processing Configuration
+data_config:
+  data_path: "extracted_data/AmesHousing.csv"
+  target_column: "SalePrice"
+  
+  # Feature engineering
+  enable_interaction_features: true
+  enable_polynomial_features: true
+  polynomial_degree: 2
+  
+  # Data validation
+  max_missing_percent: 0.5
+  outlier_method: "iqr"  # or "zscore"
+  z_threshold: 3.0
+  
+  # Feature selection
+  feature_selection_method: "variance_threshold"
+  variance_threshold: 0.0
+
+# Pipeline Execution Configuration
+pipeline_config:
+  enable_caching: false
+  enable_visualization: true
+  enable_model_comparison: true
+  enable_data_validation: true
+  
+  # Logging
+  log_level: "INFO"
+  log_file: "logs/ml_pipeline.log"
+  
+  # Output
+  output_dir: "results"
+  save_predictions: true
+  save_models: true
+
+# Experiment Tracking
+experiment:
+  name: "housing_price_prediction"
+  description: "Comprehensive housing price prediction with enhanced features"
+  tags: ["enhanced", "v2.0", "production-ready"]
